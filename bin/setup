@@ -1,0 +1,109 @@
+#!/usr/bin/env bash
+set -eo pipefail
+
+# Configuration
+ROOT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." >/dev/null 2>&1 && pwd )"
+TEMPLATE_DIR="${ROOT_DIR}/templates"
+DATABASE_DIR="${ROOT_DIR}/db"
+
+# Functions
+check-dependencies() {
+  set +e
+  for tool in "$@"; do
+    if ! which "${tool}" > /dev/null; then
+      echo "error: it appears \"${tool}\" is not installed or cannot be found in the current \$PATH"
+      exit 1
+    fi
+  done
+  set -e
+}
+
+install-template() {
+  local src
+  local dest
+  local dest_dir
+  local template_file
+  local parsed_template
+
+  src="$1";
+  dest="$2";
+  dest_dir=$(dirname "${dest}")
+  template_file="${TEMPLATE_DIR}/${src}"
+
+  create-dir "${dest_dir}"
+  parsed_template=$(
+    MINICLOUD_ROOT_DIR="${ROOT_DIR}" \
+    envsubst < "${template_file}"
+  )
+
+  echo "${parsed_template}" > "${dest}"
+  echo "Copied template: ${dest}"
+}
+
+create-dir() {
+  local dest
+  dest="$1"
+  if [ ! -d "${dest}" ]; then
+    echo "Creating directory: ${dest}"
+    mkdir -p "${dest}"
+  fi
+}
+
+install() {
+  echo "MINICLOUD SETUP"
+  echo
+  echo "This will:"
+  echo "- check installed dependencies"
+  echo "- assume minicloud stays installed in ${ROOT_DIR}"
+  echo "- create a local database directory in ${DATABASE_DIR}"
+  echo "- install and load a launch agent"
+  echo
+  read -p "Are you sure you want to continue? [Y/n] " -r </dev/tty
+  if [[ $REPLY =~ [yY](es)* ]]; then
+    echo "Aborting."
+    exit 0
+  fi;
+  echo
+
+  check-dependencies tart hdiutil
+  install-template launch-agent.plist ~/Library/LaunchAgents/local.minicloud.plist
+  create-dir "${DATABASE_DIR}"
+  launchctl load -w ~/Library/LaunchAgents/local.minicloud.plist
+}
+
+check-if-installed() {
+  if [ -f ~/Library/LaunchAgents/local.minicloud.plist ]; then
+    echo "MINICLOUD SETUP"
+    echo
+    echo "It looks like minicloud is already installed, if you want to"
+    echo "uninstall it please run ./minicloud uninstall"
+    exit 0
+  fi
+}
+
+uninstall() {
+  echo "MINICLOUD UNINSTALLER"
+  echo
+  echo "This will:"
+  echo "- disable and remove a launch agent"
+  echo
+  read -p "Are you sure you want to continue? [y/N] " -r </dev/tty
+  if [[ ! $REPLY =~ [yY](es)* ]]; then
+    echo "Aborting."
+    exit 0
+  fi
+  echo
+
+  if [ -f ~/Library/LaunchAgents/local.minicloud.plist ]; then
+    launchctl unload -w ~/Library/LaunchAgents/local.minicloud.plist
+    rm ~/Library/LaunchAgents/local.minicloud.plist
+  fi
+}
+
+# Determine what to do.
+if [[ "$1" == "uninstall" ]]; then
+  uninstall
+else
+  check-if-installed
+  install
+fi

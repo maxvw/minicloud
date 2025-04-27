@@ -1,0 +1,46 @@
+#!/usr/bin/env python3
+import socketserver
+import argparse
+import logging
+import sys
+import os
+
+# Hacky way to allow imports from project root
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(current_dir)
+sys.path.append(parent_dir)
+
+from server.http import HttpHandler
+from server.tart import Tart
+from server.storage import Storage
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Run the minicloud http server")
+
+    parser.add_argument(
+        "-p",
+        "--port",
+        type=int,
+        default=8000,
+        help="The tcp port used by the minicloud http server",
+    )
+    args = parser.parse_args()
+
+    logging.basicConfig(level=logging.INFO)
+    logging.info("Starting minicloud...")
+
+    logging.info("Starting any (known) stopped vms...")
+    node_ids = Storage.list()
+    for node_id in node_ids:
+        node = Storage.get(node_id)
+        Tart.start(node)
+
+    logging.info("Starting http server...")
+    socketserver.TCPServer.allow_reuse_address = True
+    try:
+        with socketserver.TCPServer(("", args.port), HttpHandler) as httpd:
+            logging.info("Serving at 0.0.0.0:{}".format(args.port))
+            httpd.serve_forever()
+    except KeyboardInterrupt:
+        pass
+    httpd.server_close()

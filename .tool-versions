@@ -1,0 +1,3 @@
+terraform  latest
+shellcheck latest
+black      latest

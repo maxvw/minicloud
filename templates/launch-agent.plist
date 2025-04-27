@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>local.minicloud</string>
+    <key>WorkingDirectory</key>
+    <string>${MINICLOUD_ROOT_DIR}</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>bin/minicloud</string>
+    </array>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>Debug</key>
+    <false/>
+    <key>KeepAlive</key>
+    <dict>
+      <key>Crashed</key>
+      <true/>
+    </dict>
+    <key>PosixSpawnType</key>
+    <string>Adaptive</string>
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+        <key>HOME</key>
+        <string>$HOME/</string>
+    </dict>
+    <key>inetdCompatibility</key>
+    <dict>
+        <key>Wait</key>
+        <false/>
+    </dict>
+</dict>
+</plist>
