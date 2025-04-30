@@ -12,4 +12,4 @@ jobs:
           cache: true
       - run: shellcheck bin/setup
       - run: black --check bin/minicloud server
-      - run: tf fmt -recursive -check resources/
+      - run: terraform fmt -recursive -check resources/
