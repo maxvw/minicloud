@@ -5,8 +5,21 @@ set -eo pipefail
 ROOT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." >/dev/null 2>&1 && pwd )"
 TEMPLATE_DIR="${ROOT_DIR}/templates"
 DATABASE_DIR="${ROOT_DIR}/db"
+LOGGING_DIR="${ROOT_DIR}/logs"
+HTTP_PORT="8000"
 
 # Functions
+usage() {
+  echo "usage: setup [-p PORT]"
+  echo
+  echo "Run the minicloud installer"
+  echo
+  echo "options:"
+  echo "  -h, --help       show this help message and exit"
+  echo "  -u, --uninstall  uninstall minicloud from this system"
+  echo "  -p, --port PORT  configure the tcp port used by the minicloud http server"
+}
+
 check-dependencies() {
   set +e
   for tool in "$@"; do
@@ -33,6 +46,8 @@ install-template() {
   create-dir "${dest_dir}"
   parsed_template=$(
     MINICLOUD_ROOT_DIR="${ROOT_DIR}" \
+    MINICLOUD_LOG_DIR="${LOGGING_DIR}" \
+    MINICLOUD_HTTP_PORT="${HTTP_PORT}" \
     envsubst < "${template_file}"
   )
 
@@ -56,18 +71,21 @@ install() {
   echo "- check installed dependencies"
   echo "- assume minicloud stays installed in ${ROOT_DIR}"
   echo "- create a local database directory in ${DATABASE_DIR}"
+  echo "- create a local logs directory in ${LOGGING_DIR}"
   echo "- install and load a launch agent"
+  echo "- start http server on port ${HTTP_PORT}"
   echo
   read -p "Are you sure you want to continue? [Y/n] " -r </dev/tty
-  if [[ $REPLY =~ [yY](es)* ]]; then
+  if [[ -n $REPLY ]] && [[ ! $REPLY =~ ^[yY] ]]; then
     echo "Aborting."
     exit 0
   fi;
-  echo
 
+  echo
   check-dependencies tart hdiutil
   install-template launch-agent.plist ~/Library/LaunchAgents/local.minicloud.plist
   create-dir "${DATABASE_DIR}"
+  create-dir "${LOGGING_DIR}"
   launchctl load -w ~/Library/LaunchAgents/local.minicloud.plist
 }
 
@@ -76,7 +94,7 @@ check-if-installed() {
     echo "MINICLOUD SETUP"
     echo
     echo "It looks like minicloud is already installed, if you want to"
-    echo "uninstall it please run ./minicloud uninstall"
+    echo "uninstall it please run ./minicloud --uninstall"
     exit 0
   fi
 }
@@ -86,6 +104,9 @@ uninstall() {
   echo
   echo "This will:"
   echo "- disable and remove a launch agent"
+  echo
+  echo "This will NOT:"
+  echo "- remove the database and logs directories"
   echo
   read -p "Are you sure you want to continue? [y/N] " -r </dev/tty
   if [[ ! $REPLY =~ [yY](es)* ]]; then
@@ -101,9 +122,34 @@ uninstall() {
 }
 
 # Determine what to do.
-if [[ "$1" == "uninstall" ]]; then
-  uninstall
-else
-  check-if-installed
-  install
-fi
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -h | --help)
+      usage
+      exit 0
+        ;;
+    -u | --uninstall)
+      uninstall
+      exit 0
+        ;;
+
+    -p | --port)
+      shift
+      HTTP_PORT=$1
+      if [ -z "${HTTP_PORT}" ]; then
+        echo "error: missing port number in -p PORT"
+        exit 1
+      fi
+      shift
+      ;;
+
+    *)
+      echo "ERROR: unknown parameter $1"
+      usage_general
+      exit 1
+      ;;
+  esac
+done
+
+check-if-installed
+install

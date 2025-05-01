@@ -9,6 +9,8 @@
     <key>ProgramArguments</key>
     <array>
         <string>bin/minicloud</string>
+        <string>-p</string>
+        <string>${MINICLOUD_HTTP_PORT}</string>
     </array>
     <key>RunAtLoad</key>
     <true/>
@@ -33,5 +35,9 @@
         <key>Wait</key>
         <false/>
     </dict>
+    <key>StandardOutPath</key>
+    <string>${MINICLOUD_LOG_DIR}/stdout.log</string>
+    <key>StandardErrorPath</key>
+    <string>${MINICLOUD_LOG_DIR}/stderr.log</string>
 </dict>
 </plist>
