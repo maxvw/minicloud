@@ -6,6 +6,12 @@ from .cloud_init import CloudInit
 
 
 class Tart:
+    def vm_exists(node):
+        result = subprocess.run(
+            ["tart", "get", node.id], capture_output=True, check=False
+        )
+        return result.returncode == 0
+
     def start(node):
         # Create cloud-init (CIDATA) disk image
         iso_path = CloudInit.create(node)

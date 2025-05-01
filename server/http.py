@@ -31,6 +31,10 @@ class HttpHandler(BaseHTTPRequestHandler):
         node = Storage.get(self.node_id)
         if node == None:
             return self.error_response(404, "Machine Not Found")
+        still_exists = Tart.vm_exists(node)
+        if not still_exists:
+            Storage.delete(node.id)
+            return self.error_response(404, "Machine Not Found")
         self.ok_response(200, node)
 
     # CREATE /
