@@ -13,3 +13,5 @@ jobs:
       - run: shellcheck bin/setup
       - run: black --check bin/minicloud server
       - run: terraform fmt -recursive -check resources/
+      - run: terraform -chdir=./resources/machine init
+      - run: terraform -chdir=./resources/machine test

@@ -13,7 +13,7 @@ variable "name" {
   description = "A name to easily describe your virtual machine"
 
   validation {
-    condition     = length(var.name) > 3
+    condition     = length(var.name) >= 3
     error_message = "The name should be at least 3 characters"
   }
 
