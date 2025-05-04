@@ -135,3 +135,21 @@ run "validate_disk_size_min" {
 
   expect_failures = [var.disk_size]
 }
+
+run "validate_mac_addr" {
+  command = plan
+
+  variables {
+    mac_addr = "a1:B2:c3:D4:e5:f6"
+  }
+}
+
+run "validate_mac_addr_format" {
+  command = plan
+
+  variables {
+    mac_addr = "mcdonalds address"
+  }
+
+  expect_failures = [var.mac_addr]
+}

@@ -15,6 +15,7 @@ class Node:
     disk_size: int = 10
     skip_ip: bool = False
     interface: Optional[str] = None
+    mac_addr: Optional[str] = None
     user_data: Optional[str] = None
     ipv4: Optional[str] = None
 

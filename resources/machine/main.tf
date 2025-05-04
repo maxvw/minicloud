@@ -111,6 +111,27 @@ or by having it log onto your VPN or something.
 EOT
 }
 
+variable "mac_addr" {
+  type        = string
+  nullable    = true
+  default     = null
+  description = <<EOT
+Overwrite the generated mac address for the network interface.
+
+By default tart will generate a mac address for your virtual machine and store
+it in the config.json - with this option you can override that.
+EOT
+
+  validation {
+    condition = (
+      var.mac_addr == null ||
+      can(regex("^([0-9A-Fa-f]{2}[:]){5}([0-9A-Fa-f]{2})$", var.mac_addr))
+    )
+
+    error_message = "The mac_addr requires a colon separated hexadecimal value, e.g. a1:b2:c3:d4:e5:f6"
+  }
+}
+
 resource "restapi_object" "mod" {
   path                      = "/machine"
   ignore_all_server_changes = true
@@ -119,7 +140,10 @@ resource "restapi_object" "mod" {
     var.name,
     var.vcpu,
     var.memory,
-    var.disk_size
+    var.disk_size,
+    coalesce(var.user_data, "empty_user_data"),
+    coalesce(var.interface, "empty_interface"),
+    coalesce(var.mac_addr, "empty_mac_addr"),
   ]
 
   data = jsonencode({
@@ -131,6 +155,7 @@ resource "restapi_object" "mod" {
     "user_data" = var.user_data,
     "interface" = var.interface,
     "skip_ip"   = var.skip_ip,
+    "mac_addr"  = var.mac_addr,
   })
 }
 

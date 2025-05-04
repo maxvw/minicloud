@@ -1,5 +1,6 @@
 import subprocess
 import logging
+import json
 import os
 
 from .cloud_init import CloudInit
@@ -77,6 +78,18 @@ class Tart:
 
         # Create cloud-init (CIDATA) disk image
         iso_path = CloudInit.create(node)
+
+        # If there is a custom mac address we need to update the config.json
+        # as there is no tart command for this.
+        if node.mac_addr:
+            config_path = os.path.expanduser(
+                "~/.tart/vms/{}/config.json".format(node.id)
+            )
+            with open(config_path, "r") as openfile:
+                config_dict = json.load(openfile)
+            config_dict["macAddress"] = node.mac_addr.lower()
+            with open(config_path, "w") as outfile:
+                json.dump(config_dict, outfile)
 
         # tart run stays running, so this can probably be improved but its good
         # enough for my use-case, for now
