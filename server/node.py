@@ -13,6 +13,7 @@ class Node:
     memory: int
     base_vm: str
     disk_size: int = 10
+    skip_ip: bool = False
     interface: Optional[str] = None
     user_data: Optional[str] = None
     ipv4: Optional[str] = None

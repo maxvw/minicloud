@@ -99,6 +99,18 @@ https://tart.run/faq/#resolving-the-vms-ip-when-using-bridged-networking
   EOT
 }
 
+variable "skip_ip" {
+  default     = false
+  description = <<EOT
+When using bridged mode (specified using `interface`) tart requires ARP to work
+to obtain the IP address for the machine. This does not work guaranteed with
+linux vms so this flag can skip getting the ip address.
+
+This does mean you need to find the IP yourself, for example in the DHCP server
+or by having it log onto your VPN or something.
+EOT
+}
+
 resource "restapi_object" "mod" {
   path                      = "/machine"
   ignore_all_server_changes = true
@@ -118,6 +130,7 @@ resource "restapi_object" "mod" {
     "disk_size" = var.disk_size,
     "user_data" = var.user_data,
     "interface" = var.interface,
+    "skip_ip"   = var.skip_ip,
   })
 }
 

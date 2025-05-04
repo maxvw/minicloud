@@ -27,15 +27,20 @@ class Tart:
         # print(result)
 
         # Try to get the assigned IP
-        logging.info("[{}] waiting for ipv4 address".format(node.id))
-        args = ["tart", "ip", node.id, "--wait", "5"]
-        if node.interface:
-            args.extend(["--resolver", "arp"])
-        result = subprocess.run(args, capture_output=True, check=False)
-        ipv4_addr = result.stdout.decode("utf-8").strip()
-        logging.info("[{}] now available with ipv4 {}".format(node.id, ipv4_addr))
-        # TODO: Handle errors
-        # print(result)
+        if not node.skip_ip:
+            logging.info("[{}] waiting for ipv4 address".format(node.id))
+            args = ["tart", "ip", node.id, "--wait", "5"]
+            if node.interface:
+                args.extend(["--resolver", "arp"])
+            result = subprocess.run(args, capture_output=True, check=False)
+            ipv4_addr = result.stdout.decode("utf-8").strip()
+            logging.info("[{}] now available with ipv4 {}".format(node.id, ipv4_addr))
+            # TODO: Handle errors
+            # print(result)
+        else:
+            logging.info(
+                "[{}] received skip_ip, so NOT waiting for ipv4 address".format(node.id)
+            )
 
     def create(node):
         logging.info(
@@ -85,17 +90,22 @@ class Tart:
         # print(result)
 
         # Try to get the assigned IP
-        logging.info("[{}] waiting for ipv4 address".format(node.id))
-        args = ["tart", "ip", node.id, "--wait", "5"]
-        if node.interface:
-            args.extend(["--resolver", "arp"])
-        result = subprocess.run(args, capture_output=True, check=False)
-        ipv4_addr = result.stdout.decode("utf-8").strip()
-        logging.info("[{}] now available with ipv4 {}".format(node.id, ipv4_addr))
+        if not node.skip_ip:
+            logging.info("[{}] waiting for ipv4 address".format(node.id))
+            args = ["tart", "ip", node.id, "--wait", "5"]
+            if node.interface:
+                args.extend(["--resolver", "arp"])
+            result = subprocess.run(args, capture_output=True, check=False)
+            ipv4_addr = result.stdout.decode("utf-8").strip()
+            logging.info("[{}] now available with ipv4 {}".format(node.id, ipv4_addr))
+            # TODO: Handle errors
+            # print(result)
+            node.ipv4 = ipv4_addr
+        else:
+            logging.info(
+                "[{}] received skip_ip, so NOT waiting for ipv4 address".format(node.id)
+            )
 
-        # TODO: Handle errors
-        # print(result)
-        node.ipv4 = ipv4_addr
         return node
 
     def delete(node):
