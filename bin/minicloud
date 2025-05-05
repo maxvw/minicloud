@@ -26,20 +26,24 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    logging.basicConfig(level=logging.INFO)
-    logging.info("Starting minicloud...")
+    logging.basicConfig(
+        format="[%(asctime)s] [%(levelname)s] %(message)s",
+        level=logging.INFO,
+        datefmt="%Y-%m-%d %Z %H:%M:%S",
+    )
+    logging.info("starting minicloud...")
 
-    logging.info("Starting any (known) stopped vms...")
+    logging.info("starting any (known) stopped vms...")
     node_ids = Storage.list()
     for node_id in node_ids:
         node = Storage.get(node_id)
         Tart.start(node)
 
-    logging.info("Starting http server...")
+    logging.info("starting http server...")
     socketserver.TCPServer.allow_reuse_address = True
     try:
         with socketserver.TCPServer(("", args.port), HttpHandler) as httpd:
-            logging.info("Serving at 0.0.0.0:{}".format(args.port))
+            logging.info("serving at http://0.0.0.0:{}".format(args.port))
             httpd.serve_forever()
     except KeyboardInterrupt:
         pass
