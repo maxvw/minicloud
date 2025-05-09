@@ -2,7 +2,7 @@ import dataclasses
 import random
 import json
 
-from typing import Optional
+from typing import List, Optional
 
 
 @dataclasses.dataclass
@@ -14,6 +14,7 @@ class Node:
     base_vm: str
     disk_size: int = 10
     skip_ip: bool = False
+    extra_args: Optional[List[str]] = dataclasses.field(default_factory=list)
     interface: Optional[str] = None
     mac_addr: Optional[str] = None
     user_data: Optional[str] = None

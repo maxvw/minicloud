@@ -132,6 +132,11 @@ EOT
   }
 }
 
+variable "extra_args" {
+  type    = list(string)
+  default = []
+}
+
 resource "restapi_object" "mod" {
   path                      = "/machine"
   ignore_all_server_changes = true
@@ -144,18 +149,20 @@ resource "restapi_object" "mod" {
     coalesce(var.user_data, "empty_user_data"),
     coalesce(var.interface, "empty_interface"),
     coalesce(var.mac_addr, "empty_mac_addr"),
+    jsonencode(var.extra_args),
   ]
 
   data = jsonencode({
-    "name"      = var.name,
-    "vcpu"      = var.vcpu,
-    "memory"    = var.memory,
-    "base_vm"   = var.base_vm,
-    "disk_size" = var.disk_size,
-    "user_data" = var.user_data,
-    "interface" = var.interface,
-    "skip_ip"   = var.skip_ip,
-    "mac_addr"  = var.mac_addr,
+    "name"       = var.name,
+    "vcpu"       = var.vcpu,
+    "memory"     = var.memory,
+    "base_vm"    = var.base_vm,
+    "disk_size"  = var.disk_size,
+    "user_data"  = var.user_data,
+    "interface"  = var.interface,
+    "skip_ip"    = var.skip_ip,
+    "mac_addr"   = var.mac_addr,
+    "extra_args" = var.extra_args,
   })
 }
 

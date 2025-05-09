@@ -73,6 +73,11 @@ class Tart:
         args = ["tart", "run", node.id, "--disk", iso_path, "--no-graphics"]
         if node.interface:
             args.extend(["--net-bridged", node.interface])
+
+        # allow adding custom arguments to tart run, for example to mount
+        # another disk or a virtiofs shared directory.
+        args.extend(node.extra_args)
+
         result = subprocess.Popen(args, stdout=subprocess.DEVNULL)
         # TODO: Handle errors
         # print(result)
