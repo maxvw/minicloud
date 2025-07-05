@@ -41,6 +41,8 @@ class HttpHandler(BaseHTTPRequestHandler):
     def do_POST(self):
         node = Node.new(self.json_body)
         result = Tart.create(node)
+        if result == "MacAddrInUse":
+            return self.error_response(409, "Mac Address Already In Use")
         Storage.set(node.id, result)
         self.ok_response(201, node)
 

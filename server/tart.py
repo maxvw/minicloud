@@ -2,6 +2,7 @@ import subprocess
 import logging
 import json
 import time
+import glob
 import os
 
 from signal import SIGUSR2
@@ -58,6 +59,8 @@ class Tart:
         # If there is a custom mac address we need to update the config.json
         # as there is no tart command for this.
         if node.mac_addr:
+            if not Tart.validate_mac_addr(node.mac_addr):
+                return "MacAddrInUse"
             config_path = os.path.expanduser(
                 "~/.tart/vms/{}/config.json".format(node.id)
             )
@@ -177,3 +180,15 @@ class Tart:
         # TODO: Handle errors ?
         # print(result)
         return node
+
+    def validate_mac_addr(mac_addr):
+        vms_path = os.path.expanduser("~/.tart/vms/")
+        existing_configs = glob.glob("*/config.json", root_dir=vms_path)
+        for filename in existing_configs:
+            config_path = os.path.join(vms_path, filename)
+            with open(config_path, "r") as openfile:
+                config_dict = json.load(openfile)
+            current_mac_addr = config_dict["macAddress"].lower()
+            if current_mac_addr == mac_addr:
+                return False
+        return True
