@@ -170,6 +170,10 @@ output "id" {
   value = restapi_object.mod.id
 }
 
+output "name" {
+  value = var.name
+}
+
 output "ipv4" {
   value = jsondecode(restapi_object.mod.create_response).ipv4
 }
