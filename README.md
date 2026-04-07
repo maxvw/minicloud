@@ -1,3 +1,6 @@
+> **ARCHIVED** I have since switched to a different infrastructure setup so no
+> longer require and/or use this repo.
+
 # MiniCloud
 A small utility to help manage [tart](https://tart.run) virtual machines via
 terraform using the restapi provider.
